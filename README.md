@@ -7,11 +7,12 @@ const EmployeeDashboard = () => {
 
     const [fromDate, setFromDate] = useState('');
     const [toDate, setToDate] = useState('');
-    const [leaveType, setLeaveType] = useState('CASUAL');
+    const [leaveType, setLeaveType] = useState('CASUAL'); // Default leave type
     const [remarks, setRemarks] = useState('');
     const [totalDays, setTotalDays] = useState(0);
     const [history, setHistory] = useState([]);
     const [managerId, setManagerId] = useState('');
+    const [employeeName, setEmployeeName] = useState(''); // New state for employee's name
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
@@ -32,7 +33,12 @@ const EmployeeDashboard = () => {
             setLoading(true);
             try {
                 const empRes = await getEmployeeDetails(empId);
+                console.log('Employee Details:', empRes); // Log the response to check if the name is there
                 setManagerId(empRes.data.managerId || '');
+                
+                // Concatenate firstName and lastName to set the employee's full name
+                const fullName = `${empRes.data.firstName} ${empRes.data.lastName}`;
+                setEmployeeName(fullName || ''); // Set the employee's full name
 
                 const historyRes = await getLeaveHistory(empId);
                 setHistory(historyRes.data);
@@ -48,7 +54,7 @@ const EmployeeDashboard = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError(''); // Reset error message before submitting
+        setError('');
 
         if (!managerId) {
             setError("Manager not found. Cannot apply leave.");
@@ -68,31 +74,23 @@ const EmployeeDashboard = () => {
             numberOfDays: totalDays
         };
 
-        // Log the leave payload to make sure it's being sent correctly
-        console.log("Submit Leave Request", leavePayload);
-
         try {
             setSubmitting(true);
-
-            // Send leave application to API
             await submitLeave(leavePayload, empId, managerId);  // pass empId and managerId here!
-
-            // Log success message
-            console.log("Leave applied successfully!");
-
-            // Refresh leave history after submitting leave
+            alert('Leave applied successfully!');
+            
+            // Refresh leave history
             const historyRes = await getLeaveHistory(empId);
             setHistory(historyRes.data);
 
-            // Reset form
+            // Reset form (without resetting leaveType)
             setFromDate('');
             setToDate('');
             setRemarks('');
             setTotalDays(0);
-            setLeaveType('CASUAL');  // Reset the leave type to Casual after submission
-
+            // leaveType should remain as the last selected type, so no need to reset it here.
         } catch (err) {
-            console.error("Error applying leave:", err);
+            console.error(err);
             setError('Error applying leave. Please check the form and try again.');
         } finally {
             setSubmitting(false);
@@ -101,9 +99,11 @@ const EmployeeDashboard = () => {
 
     return (
         <div className="container mt-5">
+            {/* Displaying the employee's full name at the top */}
+            <h2>{employeeName ? `Welcome ${employeeName}!` : 'Loading...'}</h2> {/* Display employee name if available */}
+
             <h3 className="mb-4">Apply Leave</h3>
             {error && <div className="alert alert-danger">{error}</div>}
-
             <div className="card p-4 mb-5 shadow-sm">
                 <form onSubmit={handleSubmit}>
                     <div className="row mb-3">
@@ -136,9 +136,8 @@ const EmployeeDashboard = () => {
                             value={leaveType}
                             onChange={(e) => setLeaveType(e.target.value)}
                         >
-                            <option value="CASUAL">Casual</option>
-                            <option value="MEDICAL">Medical</option>
-                            {/* Add more leave types here if needed */}
+                            <option value="Casual">Casual</option>
+                            <option value="Medical">Medical</option>
                         </select>
                     </div>
 
