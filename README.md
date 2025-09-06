@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 
 const EmployeeDashboard = () => {
     const { empId } = useParams();
-
+ 
     const [fromDate, setFromDate] = useState('');
     const [toDate, setToDate] = useState('');
     const [leaveType, setLeaveType] = useState('CASUAL'); // Default leave type
