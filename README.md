@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { submitLeave, getLeaveHistory, getEmployeeDetails } from '../services/api';
 import { useParams } from 'react-router-dom';
-                                     
+                                        
 const EmployeeDashboard = () => {
     const { empId } = useParams();
  
